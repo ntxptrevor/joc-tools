@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOC Submittal Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>JOC Submittal Tracker</h1>
+            <p class="subtitle">Job Order Contract Submittal Management</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="controls">
+            <button id="addSubmittalBtn" class="btn btn-primary">+ New Submittal</button>
+            <div class="filters">
+                <input type="text" id="searchInput" placeholder="Search submittals..." class="search-input">
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="under-review">Under Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="approved-as-noted">Approved as Noted</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="resubmit">Resubmit</option>
+                </select>
+                <select id="sortSelect" class="filter-select">
+                    <option value="date-desc">Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="number">By Number</option>
+                    <option value="status">By Status</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="stats-bar">
+            <div class="stat" id="statTotal"><span class="stat-value">0</span><span class="stat-label">Total</span></div>
+            <div class="stat" id="statPending"><span class="stat-value">0</span><span class="stat-label">Pending</span></div>
+            <div class="stat" id="statReview"><span class="stat-value">0</span><span class="stat-label">Under Review</span></div>
+            <div class="stat" id="statApproved"><span class="stat-value">0</span><span class="stat-label">Approved</span></div>
+            <div class="stat" id="statRejected"><span class="stat-value">0</span><span class="stat-label">Rejected</span></div>
+        </section>
+
+        <section class="submittal-table-container">
+            <table class="submittal-table" id="submittalTable">
+                <thead>
+                    <tr>
+                        <th>Submittal #</th>
+                        <th>JOC #</th>
+                        <th>Description</th>
+                        <th>Spec Section</th>
+                        <th>Submitted By</th>
+                        <th>Date Submitted</th>
+                        <th>Date Required</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="submittalBody">
+                </tbody>
+            </table>
+            <p class="empty-state" id="emptyState">No submittals yet. Click "+ New Submittal" to add one.</p>
+        </section>
+    </main>
+
+    <!-- Modal for Add/Edit Submittal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">New Submittal</h2>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <form id="submittalForm">
+                <input type="hidden" id="submittalId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="submittalNumber">Submittal #</label>
+                        <input type="text" id="submittalNumber" required placeholder="e.g. SUB-001">
+                    </div>
+                    <div class="form-group">
+                        <label for="jocNumber">JOC #</label>
+                        <input type="text" id="jocNumber" required placeholder="e.g. JOC-2026-001">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <input type="text" id="description" required placeholder="Submittal description">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="specSection">Spec Section</label>
+                        <input type="text" id="specSection" placeholder="e.g. 09 91 00">
+                    </div>
+                    <div class="form-group">
+                        <label for="submittedBy">Submitted By</label>
+                        <input type="text" id="submittedBy" required placeholder="Contractor name">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateSubmitted">Date Submitted</label>
+                        <input type="date" id="dateSubmitted" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dateRequired">Date Required</label>
+                        <input type="date" id="dateRequired">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" required>
+                            <option value="pending">Pending</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="under-review">Under Review</option>
+                            <option value="approved">Approved</option>
+                            <option value="approved-as-noted">Approved as Noted</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="resubmit">Resubmit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewer">Reviewer</label>
+                        <input type="text" id="reviewer" placeholder="Reviewer name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Additional notes..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Submittal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detailOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="detailTitle">Submittal Details</h2>
+                <button class="modal-close" id="detailClose">&times;</button>
+            </div>
+            <div id="detailContent" class="detail-content"></div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="detailCloseBtn">Close</button>
+                <button class="btn btn-primary" id="detailEditBtn">Edit</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>JOC Submittal Tracker &mdash; Job Order Contract Management Tools</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
